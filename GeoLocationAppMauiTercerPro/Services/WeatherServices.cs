@@ -1,7 +1,9 @@
-﻿using System;
+﻿using GeoLocationAppMauiTercerPro.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static GeoLocationAppMauiTercerPro.Models.WeatherModels;
 
@@ -9,6 +11,13 @@ namespace GeoLocationAppMauiTercerPro.Services
 {
     public class WeatherServices
     {
+        public async Task<WeatherData> GetCurentLocationWeatherAsync()
+        {
+            GeolocationServices geolocationServices = new GeolocationServices();
+            Location location = await geolocationServices.GetCurrentLocation();
+
+            return await GetWeatherDataFromLocationAsync(location.Latitude, location.Longitude);
+        }
         public async Task <WeatherData> GetWeatherDataFromLocationAsync(double latitude, double longitude)
         {
             string latitude_str = latitude.ToString().Replace(',', '.');
@@ -21,6 +30,8 @@ namespace GeoLocationAppMauiTercerPro.Services
                 var response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
                 var resoult = await response.Content.ReadAsStringAsync();
+                WeatherData data = JsonConverter.DeserializeObject<WeatherData>(result);
+                return data;
 
             }
         }
